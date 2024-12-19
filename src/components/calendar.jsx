@@ -2,10 +2,10 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
-import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
+import listPlugin from "@fullcalendar/list";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
-import resources, { events } from "../lib/data";
+import resourceAreaColumns, { events, resources } from "../lib/data";
 
 function MyCalendar() {
   return (
@@ -13,38 +13,31 @@ function MyCalendar() {
       plugins={[
         dayGridPlugin,
         resourceTimeGridPlugin,
-        resourceDayGridPlugin,
         resourceTimelinePlugin,
         interactionPlugin,
         bootstrap5Plugin,
+        listPlugin,
       ]}
       initialView="resourceTimeGridDay"
       resources={resources}
-      resourceAreaColumns={[
-        {
-          field: "room",
-          headerContent: "Rooms",
-        },
-      ]}
+      resourceAreaWidth="15%"
+      resourceAreaColumns={resourceAreaColumns}
       themeSystem="bootstrap5"
       events={events}
       headerToolbar={{
         start: "prev today next",
         center: "title",
-        end: "resourceTimeGridDay,resourceTimelineWeek,dayGridMonth",
+        end: "listWeek resourceTimeGridDay,resourceTimelineWeek,dayGridMonth",
       }}
       footerToolbar={{
         start: "prev",
         end: "next",
       }}
-      views={{
-        resourceTimeGridFourDays: {
-          type: "resourceTimeGridWeek",
-          duration: { days: 3 },
-        },
-      }}
+      nextDayThreshold="09:00:00"
       nowIndicator={true}
       navLinks={true}
+      locale="id"
+      timeZone="Asia/Jakarta"
       slotMinTime="08:00:00"
       slotMaxTime="17:00:00"
       height="auto"
@@ -53,9 +46,16 @@ function MyCalendar() {
         month: "Month",
         week: "Week",
         day: "Day",
-        list: "List",
+        list: "Schedule",
       }}
-      allDay={false}
+      selectable={true}
+      eventBackgroundColor="#84cc16"
+      eventBorderColor="#84cc16"
+      eventTimeFormat={{
+        hour: "numeric",
+        minute: "2-digit",
+        meridiem: false,
+      }}
     />
   );
 }
