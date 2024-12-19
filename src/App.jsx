@@ -1,18 +1,9 @@
 import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap-icons/font/bootstrap-icons.css"; // needs additional webpack config!
-import MyCalendar from "./components/calendar";
-import Navbar from "./components/navbar";
-import Container from "./components/container";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import Router from "./routes";
 
 function App() {
-  return (
-    <>
-      <Navbar />
-      <Container className="my-4">
-        <MyCalendar />
-      </Container>
-    </>
-  );
+  return <Router />;
 }
 
 export default App;
