@@ -1,21 +1,22 @@
 import Container from "./container";
 import Logo from "../assets/ptdqc.png";
 import { Link } from "react-router-dom";
-import LoginButton, { LogoutButton } from "./login";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
+import { LoginContext, UserContext } from "../lib/context";
+import LoginButton from "./login";
+import LogoutButton from "./logout";
 
 const Navbar = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const { login, setLogin } = useContext(LoginContext);
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-
-    if (user) {
-      setIsLogin(true);
+    if (user?.username && user?.password) {
+      setLogin(true);
     } else {
-      setIsLogin(false);
+      setLogin(false);
     }
-  }, []);
+  }, [user]);
 
   return (
     <nav className="navbar bg-body-tertiary">
@@ -30,7 +31,7 @@ const Navbar = () => {
           />
           PT. Duraquipt Cemerlang
         </Link>
-        {isLogin && (
+        {login && (
           <div className="d-flex gap-4 align-items-center w-full">
             <Link to="/" className="nav-link active" aria-current="page">
               Home
@@ -43,7 +44,7 @@ const Navbar = () => {
             </Link>
           </div>
         )}
-        <div>{isLogin ? <LogoutButton /> : <LoginButton />}</div>
+        <div>{login ? <LogoutButton /> : <LoginButton />}</div>
       </Container>
     </nav>
   );

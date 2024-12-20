@@ -1,5 +1,7 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import Cookies from "js-cookie";
+import { UserContext } from "../lib/context";
 
 const LoginButton = () => {
   return (
@@ -9,6 +11,7 @@ const LoginButton = () => {
         className="btn btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#loginModal"
+        onClick={() => setModal(!modal)}
       >
         Sign in
       </button>
@@ -18,6 +21,8 @@ const LoginButton = () => {
 };
 
 export const LoginModal = () => {
+  const { setUser } = useContext(UserContext);
+
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -25,8 +30,14 @@ export const LoginModal = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const data = JSON.stringify(form);
-    window.localStorage.setItem("user", data);
+
+    if (form?.username && form.password) {
+      setUser(form);
+      const modal = document.querySelector("#loginModal");
+      const modalBackdrop = document.querySelector(".modal-backdrop");
+      modal.classList.remove("show");
+      modalBackdrop.remove();
+    }
   };
 
   const handleValueChange = (e) => {
@@ -94,7 +105,7 @@ export const LoginModal = () => {
                 {/* <small className="text-danger">Wrong password</small> */}
               </div>
               <button
-                className="d-block btn btn-primary w-full"
+                className="d-block btn-login btn btn-primary w-full"
                 style={{ width: "100%" }}
               >
                 Login
@@ -104,14 +115,6 @@ export const LoginModal = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-export const LogoutButton = () => {
-  return (
-    <button type="button" className="btn btn-primary">
-      Sign out
-    </button>
   );
 };
 
