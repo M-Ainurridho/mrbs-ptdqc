@@ -69,6 +69,23 @@ const resourceAreaColumns = [
   },
 ];
 
-export 
+export const navLinks = [
+  {
+    nav: "Home",
+    path: "/",
+  },
+  {
+    nav: "Booking",
+    path: "/bookings",
+  },
+  {
+    nav: "Report",
+    path: "/reports",
+  },
+  {
+    nav: "Admin",
+    path: "/admin",
+  },
+];
 
 export default resourceAreaColumns;
