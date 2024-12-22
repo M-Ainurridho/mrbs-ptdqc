@@ -1,45 +1,91 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Container from "../../components/container";
 import Layout from "../../layout";
-import moment from "moment";
+import currentDate from "../../lib/utils";
+import ButtonBack from "../../components/buttons";
+import { resources } from "../../lib/data";
+import { debounce } from "lodash";
+import Textarea from "../../components/forms/textarea";
+import SelectField, { SelectOption } from "../../components/forms/selects";
+import InputText from "../../components/forms/input-text";
+import InputDate from "../../components/forms/input-date";
+import InputStartTime, {
+  InputEndTime,
+} from "../../components/bookings/input-time";
+import WeeklySelection from "../../components/bookings/weekly";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CreateBooking = () => {
-  const [timeOptions, setTimeOptions] = useState([]);
   const [isRecurring, setIsReccuring] = useState(false);
-  const [startTimes, setStartTimes] = useState([]);
-  const [timeSelected, setTimeSelected] = useState("");
+  const [endTimes, setEndTimes] = useState([]);
   const recurring = ["Daily", "Weekly", "Monthly"];
+  const [form, setForm] = useState({
+    title: "",
+    startRecur: currentDate(),
+    endRecur: "",
+    startTime: "",
+    endTime: "",
+    description: "",
+    resourceId: resources[0].id,
+    daysOfWeek: [],
+    recurring: isRecurring,
+    repeat: "none",
+  });
+  const navigate = useNavigate();
 
-  const endTime = moment().endOf("day").set({ hour: 17, minute: 0 });
+  const handleValueChange = debounce((e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }, 300);
 
-  useEffect(() => {
-    const options = [];
-    const startTime = moment().startOf("day").set("hour", 8);
-
-    while (startTime <= endTime) {
-      options.push({
-        value: startTime.format("HH:mm"),
-        label: startTime.format("HH:mm"),
-      });
-      startTime.add(30, "minutes");
-    }
-
-    setStartTimes(options);
-  }, []);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3001/v1/bookings`,
+        form
+      );
+
+      if (response.status === 200) {
+        navigate("/bookings");
+      }
+    } catch (err) {
+      console.log(err.response.data);
+    }
   };
 
   const handleRecurring = (e) => {
     setIsReccuring(!isRecurring);
+
+    if (!isRecurring) {
+      setForm({
+        ...form,
+        [e.target.name]: e.target.checked,
+        daysOfWeek: [1, 2, 3, 4, 5],
+        repeat: "daily",
+      });
+    } else {
+      setForm({
+        ...form,
+        [e.target.name]: e.target.checked,
+        daysOfWeek: [],
+        endRecur: "",
+        repeat: "none",
+      });
+    }
   };
 
-  const handleStartTime = (e) => {
-    console.log(e.target.value);
-  };
+  const handleRepeatRecurring = (e) => {
+    let daysOfWeek = [];
 
-  const handleChange = () => {};
+    if (isRecurring) {
+      if (e.target.value == "Daily") {
+        daysOfWeek = [1, 2, 3, 4, 5];
+      }
+    }
+    setForm({ ...form, daysOfWeek, repeat: e.target.value.toLowerCase() });
+  };
 
   return (
     <Layout>
@@ -49,94 +95,58 @@ const CreateBooking = () => {
             <h4 className="display-6 text-center mb-4">Create Event</h4>
 
             <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="title" className="form-label fw-bold">
-                  Title
-                </label>
-                <input type="title" className="form-control" id="title" />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="description" className="form-label fw-bold">
-                  Full Description
-                </label>
-                <textarea
-                  className="form-control"
-                  id="description"
-                  rows="3"
-                ></textarea>
-              </div>
-              <div className="mb-3">
-                <div className="row">
-                  <div className="col-8">
-                    <div className="row">
-                      <div className="col-2">
-                        <label
-                          htmlFor="start-date"
-                          className="col-sm-2 col-form-label fw-bold"
-                        >
-                          Start
-                        </label>
-                      </div>
-                      <div className="col-sm-10 me-0">
-                        <input
-                          type="date"
-                          className="form-control"
-                          id="start-date"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <select
-                      className="form-select"
-                      aria-label="Default select example"
-                      onChange={handleStartTime}
-                    >
-                      <option>--:-- --</option>
-                      {startTimes.length > 0 &&
-                        startTimes.map((time) => (
-                          <option value={time.label} key={time.label}>
-                            {time.value}
-                          </option>
-                        ))}
-                    </select>
+              <InputText
+                text="Title"
+                name="title"
+                onValueChange={(e) => handleValueChange(e)}
+              />
+              <Textarea
+                text="Full Description"
+                name="description"
+                onValueChange={(e) => handleValueChange(e)}
+              />
+              <SelectField
+                text="Room"
+                name="resourceId"
+                onValueChange={(e) => handleValueChange(e)}
+              >
+                {resources.map((resource, i) => (
+                  <SelectOption
+                    value={resource.id}
+                    label={resource.room}
+                    key={i}
+                  />
+                ))}
+              </SelectField>
+              <div className="row">
+                <InputDate
+                  text="Date"
+                  name="startRecur"
+                  className="col-5"
+                  defaultValue={currentDate()}
+                  min={currentDate()}
+                  onValueChange={(e) => handleValueChange(e)}
+                />
+                <div className="col-7">
+                  <div className="row">
+                    <InputStartTime
+                      text="Start Time"
+                      name="startTime"
+                      className="col-5"
+                      onValueChange={(e) => handleValueChange(e)}
+                      setEndTimes={setEndTimes}
+                    />
+                    <InputEndTime
+                      text="End Time"
+                      name="endTime"
+                      className="col-7"
+                      onValueChange={(e) => handleValueChange(e)}
+                      endTimes={endTimes}
+                    />
                   </div>
                 </div>
               </div>
-              <div className="mb-3">
-                <div className="row">
-                  <div className="col-8">
-                    <div className="row">
-                      <div className="col-2">
-                        <label
-                          htmlFor="end-date"
-                          className="col-sm-2 col-form-label fw-bold"
-                        >
-                          End
-                        </label>
-                      </div>
-                      <div className="col-sm-10 me-0">
-                        <input
-                          type="date"
-                          className="form-control"
-                          id="end-date"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <select className="form-select">
-                      <option>--:-- --</option>
-                      {startTimes.length > 0 &&
-                        startTimes.map((time) => (
-                          <option value={time.label} key={time.label}>
-                            {time.value}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
+
               <div className="mb-3">
                 <div className="row">
                   <div className="col-4">
@@ -145,49 +155,79 @@ const CreateBooking = () => {
                         className="form-check-input"
                         type="checkbox"
                         id="flexCheckDefault"
+                        name="recurring"
                         onChange={handleRecurring}
                       />
                       <label
                         className="form-check-label"
                         htmlFor="flexCheckDefault"
                       >
-                        Reccuring Event?
+                        Recurring Event?
                       </label>
                     </div>
                   </div>
                   {isRecurring && (
                     <div className="col-8">
-                      {recurring.map((recurr, i) => (
-                        <div className="form-check" key={i}>
-                          <input
-                            defaultChecked={i === 0}
-                            className="form-check-input"
-                            type="radio"
-                            name="recurringEvent"
-                            id={recurr}
-                            value={recurr}
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor={recurr}
-                            value={recurr}
-                          >
-                            {recurr}
-                          </label>
+                      <div className="row">
+                        <div className="col-6">
+                          {recurring.map((recurr, i) => (
+                            <div className="form-check mb-1" key={i}>
+                              <input
+                                defaultChecked={i === 0}
+                                className="form-check-input"
+                                type="radio"
+                                name="repeatRecur"
+                                id={recurr}
+                                value={recurr}
+                                onChange={handleRepeatRecurring}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor={recurr}
+                              >
+                                {recurr}
+                              </label>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                        {form.repeat === "weekly" && (
+                          <WeeklySelection form={form} setForm={setForm} />
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
+
+              {isRecurring && (
+                <div className="mb-3">
+                  <div className="row">
+                    <div className="col-8">
+                      <div className="row">
+                        <label
+                          htmlFor="endRecur"
+                          className="col-sm-4 col-form-label fw-bold"
+                        >
+                          Repeat Until
+                        </label>
+                        <div className="col-8 me-0">
+                          <input
+                            type="date"
+                            className="form-control"
+                            id="endRecur"
+                            name="endRecur"
+                            onChange={handleValueChange}
+                            min={form.startRecur}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="d-flex justify-content-between gap-2">
-                <button
-                  className="btn btn-danger"
-                  type="reset"
-                  style={{ width: "25%" }}
-                >
-                  Cancel
-                </button>
+                <ButtonBack style={{ width: "25%" }} />
                 <button
                   className="btn btn-primary"
                   type="submit"

@@ -69,4 +69,6 @@ const resourceAreaColumns = [
   },
 ];
 
+export 
+
 export default resourceAreaColumns;

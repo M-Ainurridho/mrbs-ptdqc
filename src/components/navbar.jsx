@@ -1,14 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Container from "./container";
 import Logo from "../assets/ptdqc.png";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { LoginContext, UserContext } from "../lib/context";
 import LoginButton from "./login";
 import LogoutButton from "./logout";
+import clsx from "clsx";
+import { navLinks } from "../lib/data";
 
 const Navbar = () => {
   const { login, setLogin } = useContext(LoginContext);
   const { user } = useContext(UserContext);
+
+  const location = useLocation();
 
   useEffect(() => {
     if (user?.username && user?.password) {
@@ -33,7 +38,19 @@ const Navbar = () => {
         </Link>
         {login && (
           <div className="d-flex gap-4 align-items-center w-full">
-            <Link to="/" className="nav-link active" aria-current="page">
+            {navLinks.map((nav) => (
+              <Link
+                key={nav.nav}
+                to={nav.path}
+                className={clsx("nav-link", {
+                  "active fw-semibold": nav.path == location.pathname,
+                })}
+                aria-current="page"
+              >
+                {nav.nav}
+              </Link>
+            ))}
+            {/* <Link to="/" className="nav-link active" aria-current="page">
               Home
             </Link>
             <Link to="/bookings" className="nav-link">
@@ -41,7 +58,7 @@ const Navbar = () => {
             </Link>
             <Link to="" className="nav-link" href="/bookings">
               Report
-            </Link>
+            </Link> */}
           </div>
         )}
         <div>{login ? <LogoutButton /> : <LoginButton />}</div>

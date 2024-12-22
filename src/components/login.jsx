@@ -1,6 +1,5 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import Cookies from "js-cookie";
 import { UserContext } from "../lib/context";
 
 const LoginButton = () => {
@@ -11,7 +10,6 @@ const LoginButton = () => {
         className="btn btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#loginModal"
-        onClick={() => setModal(!modal)}
       >
         Sign in
       </button>
@@ -35,8 +33,11 @@ export const LoginModal = () => {
       setUser(form);
       const modal = document.querySelector("#loginModal");
       const modalBackdrop = document.querySelector(".modal-backdrop");
+      const body = document.querySelector("body");
       modal.classList.remove("show");
       modalBackdrop.remove();
+      body.setAttribute("class", "");
+      body.setAttribute("style", "");
     }
   };
 

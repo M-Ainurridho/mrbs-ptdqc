@@ -5,9 +5,28 @@ import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import listPlugin from "@fullcalendar/list";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
-import resourceAreaColumns, { events, resources } from "../lib/data";
+import resourceAreaColumns, { resources } from "../lib/data";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function MyCalendar() {
+  const [events, setEvents] = useState([]);
+
+  const fetchAllEvents = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/v1/bookings`);
+      const { bookings } = response.data.payload;
+
+      setEvents(bookings);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllEvents();
+  }, []);
+
   return (
     <FullCalendar
       plugins={[
