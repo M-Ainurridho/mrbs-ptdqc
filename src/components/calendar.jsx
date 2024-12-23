@@ -14,7 +14,11 @@ function MyCalendar() {
 
   const fetchAllEvents = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/bookings`);
+      const response = await axios.get(`http://localhost:3001/v1/bookings`, {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      });
       const { bookings } = response.data.payload;
 
       setEvents(bookings);
