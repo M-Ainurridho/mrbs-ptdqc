@@ -11,6 +11,7 @@ import axios from "axios";
 
 function MyCalendar() {
   const [events, setEvents] = useState([]);
+  const [resources, setResources] = useState([]);
 
   const fetchAllEvents = async () => {
     try {
@@ -27,8 +28,19 @@ function MyCalendar() {
     }
   };
 
+  const fetchAllRooms = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/v1/rooms`);
+      const { rooms } = response.data.payload;
+      setResources(rooms);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     fetchAllEvents();
+    fetchAllRooms();
   }, []);
 
   return (

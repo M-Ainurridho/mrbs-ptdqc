@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Container from "../../components/container";
 import Layout from "../../layout";
 import currentDate from "../../lib/utils";
@@ -15,10 +15,13 @@ import InputStartTime, {
 import WeeklySelection from "../../components/bookings/weekly";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../lib/context";
 
 const CreateBooking = () => {
+  const { user } = useContext(UserContext);
   const [isRecurring, setIsReccuring] = useState(false);
   const [endTimes, setEndTimes] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const recurring = ["Daily", "Weekly", "Monthly"];
   const [form, setForm] = useState({
     title: "",
@@ -27,10 +30,11 @@ const CreateBooking = () => {
     startTime: "",
     endTime: "",
     description: "",
-    resourceId: resources[0].id,
+    resourceId: "",
     daysOfWeek: [],
     recurring: isRecurring,
     repeat: "none",
+    userId: "",
   });
   const navigate = useNavigate();
 
@@ -40,11 +44,14 @@ const CreateBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = form;
+    formData.userId = user.id;
+    console.log(formData);
 
     try {
       const response = await axios.post(
         `http://localhost:3001/v1/bookings`,
-        form
+        formData
       );
 
       if (response.status === 200) {
@@ -87,6 +94,21 @@ const CreateBooking = () => {
     setForm({ ...form, daysOfWeek, repeat: e.target.value.toLowerCase() });
   };
 
+  const fetchAllRooms = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/v1/rooms`);
+      const { rooms } = response.data.payload;
+      setForm({ ...form, resourceId: rooms[0].id });
+      setRooms(rooms);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllRooms();
+  }, []);
+
   return (
     <Layout>
       <Container className="my-4">
@@ -110,11 +132,11 @@ const CreateBooking = () => {
                 name="resourceId"
                 onValueChange={(e) => handleValueChange(e)}
               >
-                {resources.map((resource, i) => (
+                {rooms.map((room) => (
                   <SelectOption
-                    value={resource.id}
-                    label={resource.room}
-                    key={i}
+                    value={room.id}
+                    label={room.room}
+                    key={room.id}
                   />
                 ))}
               </SelectField>

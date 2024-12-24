@@ -5,8 +5,6 @@ const currentDate = () => {
   return date.toISOString().split("T")[0];
 };
 
-export default currentDate;
-
 export const setTimes = (hour = 8, minute = 0) => {
   const options = [];
   const startTime = moment().startOf("day").set({ hour, minute });
@@ -44,3 +42,19 @@ export const dayNumber = (day) => {
       return 1;
   }
 };
+
+export const dateFormat = (date) => {
+  const newDate = new Date(date).toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+  });
+
+  const splitString = newDate.split(", ");
+  const formatDate = splitString[0]
+    .split("/")
+    .map((day) => (day.length < 2 ? `0${day}` : day))
+    .reverse()
+    .join("-");
+  return formatDate;
+};
+
+export default currentDate;

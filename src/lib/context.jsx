@@ -14,7 +14,7 @@ const LoginProvider = ({ children }) => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState({ username: "", password: "" });
+  const [user, setUser] = useState({});
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

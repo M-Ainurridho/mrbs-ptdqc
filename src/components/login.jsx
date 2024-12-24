@@ -1,6 +1,8 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { UserContext } from "../lib/context";
+import { LoginContext, UserContext } from "../lib/context";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const LoginButton = () => {
   return (
@@ -20,24 +22,38 @@ const LoginButton = () => {
 
 export const LoginModal = () => {
   const { setUser } = useContext(UserContext);
+  const { setLogin } = useContext(LoginContext);
 
   const [form, setForm] = useState({
     username: "",
     password: "",
   });
+  const [errors, setErrors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (form?.username && form.password) {
-      setUser(form);
-      const modal = document.querySelector("#loginModal");
-      const modalBackdrop = document.querySelector(".modal-backdrop");
-      const body = document.querySelector("body");
-      modal.classList.remove("show");
-      modalBackdrop.remove();
-      body.setAttribute("class", "");
-      body.setAttribute("style", "");
+    try {
+      if (form?.username && form.password) {
+        const response = await axios.post(
+          `http://localhost:3001/v1/users/login`,
+          form
+        );
+        const { token } = response.data.payload;
+        Cookies.set("token", token);
+        setLogin(true);
+
+        const modal = document.querySelector("#loginModal");
+        const modalBackdrop = document.querySelector(".modal-backdrop");
+        const body = document.querySelector("body");
+        modal.classList.remove("show");
+        modalBackdrop.remove();
+        body.setAttribute("class", "");
+        body.setAttribute("style", "");
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 

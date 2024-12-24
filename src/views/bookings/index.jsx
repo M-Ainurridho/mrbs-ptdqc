@@ -6,11 +6,36 @@ import Table, {
   TableHead,
   TableRow,
 } from "../../components/tables";
-import { events } from "../../lib/data";
+// import { events } from "../../lib/data";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { dateFormat } from "../../lib/utils";
 
 const Booking = () => {
   const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+
+  const fetchAllEvents = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/v1/bookings/events",
+        {
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        }
+      );
+      setEvents(response.data.payload.events);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllEvents();
+  }, []);
+
   return (
     <Layout>
       <Container className="my-4">
@@ -28,7 +53,7 @@ const Booking = () => {
           <TableHead
             fields={[
               "No",
-              "Room",
+              // "Room",
               "Event",
               "Start Date",
               "End Date",
@@ -40,15 +65,15 @@ const Booking = () => {
             {events.map((data, i) => (
               <TableRow key={i}>
                 <TableColumn>{i + 1}</TableColumn>
-                <TableColumn>{data.room}</TableColumn>
+                {/* <TableColumn>{data.room}</TableColumn> */}
                 <TableColumn
                   className="text-truncate"
                   style={{ maxWidth: "200px" }}
                 >
                   {data.title}
                 </TableColumn>
-                <TableColumn>{data.startRecur}</TableColumn>
-                <TableColumn>{data.endRecur}</TableColumn>
+                <TableColumn>{dateFormat(data.startRecur)}</TableColumn>
+                <TableColumn>{dateFormat(data.endRecur)}</TableColumn>
                 <TableColumn>
                   {data.startTime} - {data.endTime}
                 </TableColumn>

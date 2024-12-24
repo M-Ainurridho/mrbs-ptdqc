@@ -1,13 +1,17 @@
 import { useContext } from "react";
-import { UserContext } from "../lib/context";
+import { LoginContext, UserContext } from "../lib/context";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export const LogoutButton = () => {
+  const { setLogin } = useContext(LoginContext);
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    setUser({ username: "", password: "" });
+    setUser({});
+    setLogin(false);
+    Cookies.remove("token");
     navigate("/");
   };
 
