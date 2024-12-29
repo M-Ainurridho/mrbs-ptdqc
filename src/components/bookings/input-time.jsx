@@ -10,6 +10,8 @@ const InputStartTime = ({
   onValueChange,
   className = "",
   setEndTimes,
+  errors = [],
+  defaultValue = "",
 }) => {
   const [startTimes, setStartTimes] = useState([]);
 
@@ -61,11 +63,17 @@ const InputStartTime = ({
       onValueChange={(e) => {
         handleValueChange(e), handleStartTime(e);
       }}
+      errors={errors}
     >
       <option value="">--:-- --</option>
       {startTimes.length > 0 &&
         startTimes.map((time, i) => (
-          <SelectOption value={`${time.label}:00`} label={time.value} key={i} />
+          <SelectOption
+            value={`${time.label}:00`}
+            label={time.value}
+            key={i}
+            selected={`${time.label}:00` == defaultValue && "selected"}
+          />
         ))}
     </SelectField>
   );
@@ -77,6 +85,8 @@ export const InputEndTime = ({
   onValueChange,
   endTimes,
   className = "",
+  errors = [],
+  defaultValue = "",
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -89,16 +99,18 @@ export const InputEndTime = ({
       className={className}
       disabled={endTimes.length < 1 && "disabled"}
       onValueChange={(e) => handleValueChange(e)}
+      errors={errors}
     >
       <option value="">--:-- --</option>
       {endTimes.length > 0 &&
         endTimes.map((time, i) => (
           <SelectOption
+            key={i}
             value={`${time.label}:00`}
             label={`${time.value} (${
               time.duration === 0.5 ? "30 minutes" : `${time.duration} hours`
             })`}
-            key={i}
+            selected={`${time.label}:00` == defaultValue && "selected"}
           />
         ))}
     </SelectField>

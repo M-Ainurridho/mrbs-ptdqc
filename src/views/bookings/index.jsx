@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import Layout from "../../layout";
 import Container from "../../components/container";
 import Table, {
@@ -6,82 +8,134 @@ import Table, {
   TableHead,
   TableRow,
 } from "../../components/tables";
-// import { events } from "../../lib/data";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { dateFormat } from "../../lib/utils";
+import Pagination from "../../components/pagination";
+import Search from "../../components/forms/search";
+import Cookies from "js-cookie";
+import { UserContext } from "../../lib/context";
 
 const Booking = () => {
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const [totalData, setTotalData] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [alert, setAlert] = useState(false);
 
-  const fetchAllEvents = async () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams?.get("page")) || 1;
+  const query = searchParams?.get("query") || "";
+
+  const token = Cookies.get("token");
+  const { user } = useContext(UserContext);
+
+  const fetchAllEvents = async (page, query) => {
     try {
-      const response = await axios.get(
-        "http://localhost:3001/v1/bookings/events",
-        {
-          headers: {
-            "Cache-Control": "no-store",
-          },
-        }
+      const responseOne = await axios.post(
+        `http://localhost:3001/v1/users/exchangetoken`,
+        { token }
       );
-      setEvents(response.data.payload.events);
+
+      if (responseOne.status === 200) {
+        const { userId } = responseOne.data.payload;
+
+        const responseTwo = await axios.get(
+          `http://localhost:3001/v1/bookings/events/${userId}?page=${page}&query=${query}`,
+          {
+            headers: {
+              "Cache-Control": "no-store",
+            },
+          }
+        );
+        setEvents(responseTwo.data.payload.events);
+        setTotalData(responseTwo.data.payload.totalData);
+        setTotalPages(responseTwo.data.payload.totalPages);
+        setAlert(responseTwo.data.payload.totalData === 0 ? true : false);
+      } else {
+        throw new Error();
+      }
     } catch (err) {
       console.log(err);
     }
   };
 
   useEffect(() => {
-    fetchAllEvents();
-  }, []);
+    fetchAllEvents(page, query);
+  }, [page, query]);
 
   return (
     <Layout>
       <Container className="my-4">
-        <div className="d-flex justify-content-between align-items-center">
-          <h4 className="display-6">Your Events</h4>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/bookings/create")}
-          >
-            Add Event
-          </button>
-        </div>
+        <header className="row d-flex align-items-center">
+          <div className="col-6">
+            <h4 className="display-6">
+              {user?.role !== "admin" ? "Your Events" : "All Events"}
+            </h4>
+          </div>
+          <div className="col-6">
+            <div className="d-flex justify-content-end gap-2">
+              <Search
+                placeholder="Search by event, room, etc"
+                searchParams={searchParams}
+              />
+              <Link to="/bookings/create" className="btn btn-primary">
+                Add Event
+              </Link>
+            </div>
+          </div>
+        </header>
 
-        <Table className="mt-3">
-          <TableHead
-            fields={[
-              "No",
-              // "Room",
-              "Event",
-              "Start Date",
-              "End Date",
-              "Duration",
-              "Repeat",
-            ]}
-          />
-          <TableBody>
-            {events.map((data, i) => (
-              <TableRow key={i}>
-                <TableColumn>{i + 1}</TableColumn>
-                {/* <TableColumn>{data.room}</TableColumn> */}
-                <TableColumn
-                  className="text-truncate"
-                  style={{ maxWidth: "200px" }}
-                >
-                  {data.title}
-                </TableColumn>
-                <TableColumn>{dateFormat(data.startRecur)}</TableColumn>
-                <TableColumn>{dateFormat(data.endRecur)}</TableColumn>
-                <TableColumn>
-                  {data.startTime} - {data.endTime}
-                </TableColumn>
-                <TableColumn>{data.repeat ? data.repeat : "none"}</TableColumn>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {alert ? (
+          <div className="alert alert-danger text-center" role="alert">
+            No events!
+          </div>
+        ) : (
+          <>
+            <Table className="mt-2">
+              <TableHead
+                fields={[
+                  // "No",
+                  "Event",
+                  "Room",
+                  "Start Date",
+                  "End Date",
+                  "Duration",
+                  "Repeat",
+                ]}
+              />
+              <TableBody>
+                {events.map((event, i) => {
+                  return (
+                    <TableRow key={i} path={`/bookings/${event.id}`}>
+                      <TableColumn
+                        className="text-truncate"
+                        style={{ maxWidth: "200px" }}
+                      >
+                        {event.title}
+                      </TableColumn>
+                      <TableColumn>{event.room}</TableColumn>
+                      <TableColumn>{dateFormat(event.startRecur)}</TableColumn>
+                      <TableColumn>{dateFormat(event.endRecur)}</TableColumn>
+                      <TableColumn>
+                        {event.startTime} - {event.endTime}
+                      </TableColumn>
+                      <TableColumn>
+                        {event.repeat ? event.repeat : "none"}
+                      </TableColumn>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <Pagination
+              page={page}
+              totalData={totalData}
+              totalPages={totalPages}
+              searchParams={searchParams}
+            />
+          </>
+        )}
       </Container>
     </Layout>
   );

@@ -1,7 +1,11 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react/prop-types */
 import { createContext, useState } from "react";
 
 export const LoginContext = createContext(false);
 export const UserContext = createContext(null);
+// export const AlertContext = createContext(false);
+
 
 const LoginProvider = ({ children }) => {
   const [login, setLogin] = useState(false);
@@ -22,5 +26,15 @@ export const UserProvider = ({ children }) => {
     </UserContext.Provider>
   );
 };
+
+// export const AlertProvider = ({ children }) => {
+//   const [alert, setAlert] = useState(false);
+
+//   return (
+//     <AlertContext.Provider value={{ alert, setAlert }}>
+//       {children}
+//     </AlertContext.Provider>
+//   );
+// };
 
 export default LoginProvider;

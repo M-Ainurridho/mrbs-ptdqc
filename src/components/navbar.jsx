@@ -1,18 +1,33 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Container from "./container";
 import Logo from "../assets/ptdqc.png";
-import { Link, useLocation } from "react-router-dom";
-import { useContext } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import { LoginContext, UserContext } from "../lib/context";
 import LoginButton from "./login";
 import LogoutButton from "./logout";
 import clsx from "clsx";
-import { navLinks } from "../lib/data";
+import { adminLinks, memberLinks } from "../lib/data";
 
 const Navbar = () => {
   const { login } = useContext(LoginContext);
+  const { user } = useContext(UserContext);
+
+  const [navLinks, setNavLinks] = useState(adminLinks);
 
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      location.pathname.startsWith("/users") ||
+      location.pathname.startsWith("/rooms")
+    ) {
+      if (user?.role !== "admin") {
+        navigate("/forbidden");
+      }
+    }
+  }, []);
 
   return (
     <nav className="navbar bg-body-tertiary">

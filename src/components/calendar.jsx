@@ -5,7 +5,7 @@ import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import listPlugin from "@fullcalendar/list";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
-import resourceAreaColumns, { resources } from "../lib/data";
+import resourceAreaColumns from "../lib/data";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -20,9 +20,7 @@ function MyCalendar() {
           "Cache-Control": "no-store",
         },
       });
-      const { bookings } = response.data.payload;
-
-      setEvents(bookings);
+      setEvents(response.data.payload.bookings);
     } catch (error) {
       console.log(error);
     }
@@ -31,8 +29,7 @@ function MyCalendar() {
   const fetchAllRooms = async () => {
     try {
       const response = await axios.get(`http://localhost:3001/v1/rooms`);
-      const { rooms } = response.data.payload;
-      setResources(rooms);
+      setResources(response.data.payload.rooms);
     } catch (err) {
       console.log(err);
     }

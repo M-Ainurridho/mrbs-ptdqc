@@ -3,10 +3,38 @@
 import { useEffect, useState } from "react";
 import { dayNumber } from "../../lib/utils";
 
-const WeeklySelection = ({ form, setForm }) => {
+const WeeklySelection = ({ form, setForm, defaultValue = [] }) => {
   const today = dayNumber(new Date().getDay());
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const [daysOfWeek, setDaysOfWeek] = useState([today]);
+  const [days, setDays] = useState([
+    {
+      checked: null,
+      num: 1,
+      day: "Monday",
+    },
+    {
+      checked: null,
+      num: 2,
+      day: "Tuesday",
+    },
+    {
+      checked: null,
+      num: 3,
+      day: "Wednesday",
+    },
+    {
+      checked: null,
+      num: 4,
+      day: "Thursday",
+    },
+    {
+      checked: null,
+      num: 5,
+      day: "Friday",
+    },
+  ]);
+  const [daysOfWeek, setDaysOfWeek] = useState(
+    defaultValue.length > 0 ? [...defaultValue] : [today]
+  );
 
   const handleValueClick = (e) => {
     if (e.target.checked) {
@@ -21,8 +49,22 @@ const WeeklySelection = ({ form, setForm }) => {
     }
   };
 
+  const handleDays = () => {
+    const dayss = days.map((day) => {
+      for (let num of defaultValue) {
+        if (num == day.num) {
+          return { ...day, checked: true };
+        }
+      }
+
+      return { ...day, checked: false };
+    });
+
+    setDays(dayss);
+  };
+
   useEffect(() => {
-    setForm({ ...form, daysOfWeek: [today] });
+    handleDays();
   }, []);
 
   return (
@@ -30,15 +72,17 @@ const WeeklySelection = ({ form, setForm }) => {
       {days.map((day, i) => (
         <div className="form-check mb-1" key={i}>
           <input
-            defaultChecked={i + 1 === today || i == 0}
+            defaultChecked={
+              defaultValue.length < 1 ? day.num === 1 : day.checked
+            }
             className="form-check-input"
             type="checkbox"
-            value={i + 1}
-            id={day}
+            value={day.num}
+            id={day.day}
             onClick={handleValueClick}
           />
-          <label className="form-check-label" htmlFor={day}>
-            {day}
+          <label className="form-check-label" htmlFor={day.day}>
+            {day.day}
           </label>
         </div>
       ))}

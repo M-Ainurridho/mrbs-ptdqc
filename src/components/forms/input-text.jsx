@@ -3,14 +3,20 @@ import clsx from "clsx";
 /* eslint-disable react/prop-types */
 const InputText = ({
   text,
+  type = "text",
   defaultValue = "",
   name,
   onValueChange,
   className = "",
+  errors = [],
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
   };
+
+  const isInvalid =
+    errors.length > 0 &&
+    errors.map((error) => error.path == name && "is-invalid");
 
   return (
     <div className="mb-3">
@@ -18,12 +24,33 @@ const InputText = ({
         {text}
       </label>
       <input
-        type="text"
-        className={clsx("form-control", className)}
+        type={type}
+        className={clsx("form-control", isInvalid, className)}
         defaultValue={defaultValue}
         id={name}
         name={name}
         onChange={handleValueChange}
+      />
+      {errors.length > 0 &&
+        errors.map(
+          (error, i) =>
+            error.path == name && (
+              <div key={i} className="invalid-feedback">
+                {error.msg}
+              </div>
+            )
+        )}
+    </div>
+  );
+};
+
+export const InputHidden = ({ defaultValue = "", className = "" }) => {
+  return (
+    <div className="mb-3">
+      <input
+        type="hidden"
+        className={clsx("form-control", className)}
+        defaultValue={defaultValue}
       />
     </div>
   );

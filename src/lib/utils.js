@@ -43,6 +43,21 @@ export const dayNumber = (day) => {
   }
 };
 
+export const numberToDay = (num) => {
+  switch (num) {
+    case 1:
+      return "monday";
+    case 2:
+      return "tuesday";
+    case 3:
+      return "wednesday";
+    case 4:
+      return "thursday";
+    case 5:
+      return "friday";
+  }
+};
+
 export const dateFormat = (date) => {
   const newDate = new Date(date).toLocaleString("id-ID", {
     timeZone: "Asia/Jakarta",
@@ -55,6 +70,36 @@ export const dateFormat = (date) => {
     .reverse()
     .join("-");
   return formatDate;
+};
+
+export const toCapitalize = (word) => {
+  const firstLetter = word[0].toUpperCase();
+  const exceptFirstLetter = word.slice(1);
+
+  const newWord = firstLetter + exceptFirstLetter;
+  return newWord;
+};
+
+export const createAlert = (title, text, icon) => {
+  localStorage.setItem("alert", true);
+  localStorage.setItem("alertTitle", title);
+  localStorage.setItem("alertText", text);
+  localStorage.setItem("alertIcon", icon);
+};
+
+export const getAlert = () => {
+  const title = localStorage.getItem("alertTitle");
+  const text = localStorage.getItem("alertText");
+  const icon = localStorage.getItem("alertIcon");
+
+  return { title, text, icon };
+};
+
+export const removeAlert = () => {
+  localStorage.removeItem("alert");
+  localStorage.removeItem("alertTitle");
+  localStorage.removeItem("alertText");
+  localStorage.removeItem("alertIcon");
 };
 
 export default currentDate;

@@ -1,8 +1,14 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
 import Container from "../../components/container";
 import Layout from "../../layout";
-import currentDate, { createAlert, toCapitalize } from "../../lib/utils";
+import currentDate, {
+  createAlert,
+  dateFormat,
+  setTimes,
+  toCapitalize,
+} from "../../lib/utils";
 import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 import { debounce } from "lodash";
 import Textarea from "../../components/forms/textarea";
@@ -14,12 +20,14 @@ import InputStartTime, {
 } from "../../components/bookings/input-time";
 import WeeklySelection from "../../components/bookings/weekly";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../../lib/context";
 import clsx from "clsx";
+import moment from "moment";
 import { recurring } from "../../lib/data";
 
-const CreateBooking = () => {
+const EditBooking = () => {
+  const { id } = useParams();
   const { user } = useContext(UserContext);
   const [isRecurring, setIsReccuring] = useState(false);
   const [endTimes, setEndTimes] = useState([]);
@@ -28,16 +36,15 @@ const CreateBooking = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
-    startRecur: currentDate(),
+    startRecur: "",
     endRecur: "",
     startTime: "",
     endTime: "",
     description: "",
     resourceId: "",
     daysOfWeek: [],
-    recurring: isRecurring,
-    repeat: "none",
-    userId: "",
+    recurring: null,
+    repeat: "",
   });
   const navigate = useNavigate();
 
@@ -48,24 +55,51 @@ const CreateBooking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const formData = form;
-    formData.userId = user.id;
 
     try {
-      const response = await axios.post(
-        `http://localhost:3001/v1/bookings`,
-        formData
+      const response = await axios.patch(
+        `http://localhost:3001/v1/bookings/${id}`,
+        form
       );
 
-      if (response.status === 200) {
-        createAlert("Good job!", "Successfully add new event", "success");
-        navigate("/bookings");
-      }
+        if (response.status === 200) {
+          createAlert("Good job!", "Successfuly update an event", "success");
+          navigate("/bookings");
+        }
     } catch (err) {
       setErrors(err.response.data.errors);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEndTimes = (value) => {
+    const times = value.split(":");
+    let hour = Number(times[0]);
+    let minute = Number(times[1]);
+
+    if (minute === 0) {
+      minute = 30;
+    } else {
+      hour += 1;
+      minute = 0;
+    }
+
+    const options = setTimes(hour, minute);
+    const durations = options.map((time) => time.duration + 30).reverse();
+
+    const dataEndTImes = options.map((time, i) => {
+      for (let j = 0; j < durations.length; j++) {
+        const duration = moment.duration(durations[i], "minutes");
+        return {
+          value: time.value,
+          label: time.label,
+          duration: duration.asHours(),
+        };
+      }
+    });
+
+    setEndTimes(dataEndTImes);
   };
 
   const handleRecurring = (e) => {
@@ -111,8 +145,51 @@ const CreateBooking = () => {
     }
   };
 
+  const fetchBookingById = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/v1/bookings/${id}`
+      );
+      const {
+        title,
+        description,
+        startRecur,
+        endRecur,
+        startTime,
+        endTime,
+        recurring,
+        repeat,
+        resourceId,
+        daysOfWeek,
+      } = response.data.payload.booking;
+      setForm({
+        ...form,
+        title,
+        description,
+        startRecur: dateFormat(startRecur),
+        startTime,
+        endTime,
+        recurring: Boolean(recurring),
+        repeat,
+        resourceId,
+        endRecur: recurring ? dateFormat(endRecur) : "",
+        daysOfWeek:
+          daysOfWeek.length > 0
+            ? daysOfWeek.split(",").map((day) => Number(day))
+            : [],
+      });
+      setIsReccuring(Boolean(recurring));
+      handleEndTimes(startTime);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  //   console.log(form);
+
   useEffect(() => {
     fetchAllRooms();
+    fetchBookingById(id);
   }, []);
 
   return (
@@ -120,12 +197,13 @@ const CreateBooking = () => {
       <Container className="my-4">
         <div className="row">
           <div className="col-6 mx-auto">
-            <h4 className="display-6 text-center mb-4">Create Event</h4>
+            <h4 className="display-6 text-center mb-4">Edit Event</h4>
 
             <form onSubmit={handleSubmit}>
               <InputText
                 text="Title"
                 name="title"
+                defaultValue={form.title}
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
               />
@@ -133,6 +211,7 @@ const CreateBooking = () => {
                 text="Full Description"
                 name="description"
                 onValueChange={(e) => handleValueChange(e)}
+                defaultValue={form.description}
               />
               <SelectField
                 text="Room"
@@ -145,6 +224,7 @@ const CreateBooking = () => {
                     value={room.id}
                     label={room.room}
                     key={room.id}
+                    selected={room.id == form.resourceId && "selected"}
                   />
                 ))}
               </SelectField>
@@ -153,8 +233,8 @@ const CreateBooking = () => {
                   text="Date"
                   name="startRecur"
                   className="col-5"
-                  defaultValue={currentDate()}
-                  min={currentDate()}
+                  defaultValue={form.startRecur}
+                  min={form.startRecur}
                   onValueChange={(e) => handleValueChange(e)}
                   errors={errors}
                 />
@@ -167,6 +247,7 @@ const CreateBooking = () => {
                       onValueChange={(e) => handleValueChange(e)}
                       setEndTimes={setEndTimes}
                       errors={errors}
+                      defaultValue={form.startTime}
                     />
                     <InputEndTime
                       text="End Time"
@@ -175,6 +256,7 @@ const CreateBooking = () => {
                       onValueChange={(e) => handleValueChange(e)}
                       endTimes={endTimes}
                       errors={errors}
+                      defaultValue={form.endTime}
                     />
                   </div>
                 </div>
@@ -187,14 +269,12 @@ const CreateBooking = () => {
                       <input
                         className="form-check-input"
                         type="checkbox"
-                        id="flexCheckDefault"
+                        id="recurring"
                         name="recurring"
-                        onChange={handleRecurring}
+                        onClick={handleRecurring}
+                        defaultChecked={form.recurring}
                       />
-                      <label
-                        className="form-check-label"
-                        htmlFor="flexCheckDefault"
-                      >
+                      <label className="form-check-label" htmlFor="recurring">
                         Recurring Event?
                       </label>
                     </div>
@@ -206,7 +286,11 @@ const CreateBooking = () => {
                           {recurring.map((recurr, i) => (
                             <div className="form-check mb-1" key={i}>
                               <input
-                                defaultChecked={i === 0}
+                                defaultChecked={
+                                  form.repeat !== "none"
+                                    ? recurr == form.repeat && true
+                                    : i == 0
+                                }
                                 className="form-check-input"
                                 type="radio"
                                 name="repeatRecur"
@@ -224,7 +308,11 @@ const CreateBooking = () => {
                           ))}
                         </div>
                         {form.repeat === "weekly" && (
-                          <WeeklySelection form={form} setForm={setForm} />
+                          <WeeklySelection
+                            form={form}
+                            setForm={setForm}
+                            defaultValue={form.daysOfWeek}
+                          />
                         )}
                       </div>
                     </div>
@@ -241,6 +329,7 @@ const CreateBooking = () => {
                         name="endRecur"
                         onValueChange={(e) => handleValueChange(e)}
                         errors={errors}
+                        defaultValue={form.endRecur}
                       />
                     </div>
                   </div>
@@ -250,7 +339,7 @@ const CreateBooking = () => {
               <div className="d-flex justify-content-between gap-2">
                 <ButtonBack style={{ width: "25%" }} />
                 <ButtonSubmit
-                  text="Create"
+                  text="Save"
                   className={clsx({
                     "btn-primary": !isLoading,
                     "btn-secondary disabled": isLoading,
@@ -266,4 +355,4 @@ const CreateBooking = () => {
   );
 };
 
-export default CreateBooking;
+export default EditBooking;

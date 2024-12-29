@@ -1,8 +1,9 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { LoginContext, UserContext } from "../lib/context";
+import { LoginContext } from "../lib/context";
 import Cookies from "js-cookie";
 import axios from "axios";
+import clsx from "clsx";
 
 const LoginButton = () => {
   return (
@@ -21,7 +22,6 @@ const LoginButton = () => {
 };
 
 export const LoginModal = () => {
-  const { setUser } = useContext(UserContext);
   const { setLogin } = useContext(LoginContext);
 
   const [form, setForm] = useState({
@@ -33,27 +33,28 @@ export const LoginModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      if (form?.username && form.password) {
-        const response = await axios.post(
-          `http://localhost:3001/v1/users/login`,
-          form
-        );
-        const { token } = response.data.payload;
-        Cookies.set("token", token);
-        setLogin(true);
+      const response = await axios.post(
+        `http://localhost:3001/v1/users/login`,
+        form
+      );
+      const { token } = response.data.payload;
+      Cookies.set("token", token);
+      setLogin(true);
 
-        const modal = document.querySelector("#loginModal");
-        const modalBackdrop = document.querySelector(".modal-backdrop");
-        const body = document.querySelector("body");
-        modal.classList.remove("show");
-        modalBackdrop.remove();
-        body.setAttribute("class", "");
-        body.setAttribute("style", "");
-      }
+      const modal = document.querySelector("#loginModal");
+      const modalBackdrop = document.querySelector(".modal-backdrop");
+      const body = document.querySelector("body");
+      modal.classList.remove("show");
+      modalBackdrop.remove();
+      body.setAttribute("class", "");
+      body.setAttribute("style", "");
     } catch (err) {
-      console.log(err);
+      setErrors(err.response.data.errors);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,14 +96,28 @@ export const LoginModal = () => {
                   <input
                     type="text"
                     name="username"
-                    className="form-control"
+                    className={clsx(
+                      "form-control",
+                      errors.length > 0 &&
+                        errors.map(
+                          (error) => error.path == "username" && "is-invalid"
+                        )
+                    )}
                     placeholder="Username"
                     aria-label="Username"
                     aria-describedby="basic-addon1"
                     onChange={handleValueChange}
                   />
+                  {errors.length > 0 &&
+                    errors.map(
+                      (error, i) =>
+                        error.path == "username" && (
+                          <div key={i} className="ms-5 invalid-feedback">
+                            {error.msg}
+                          </div>
+                        )
+                    )}
                 </div>
-                {/* <small className="text-danger">Username isn't registered</small> */}
               </div>
               <div className="mb-3">
                 <div className="input-group">
@@ -112,17 +127,36 @@ export const LoginModal = () => {
                   <input
                     type="password"
                     name="password"
-                    className="form-control"
+                    className={clsx(
+                      "form-control",
+                      errors.length > 0 &&
+                        errors.map(
+                          (error) => error.path == "password" && "is-invalid"
+                        )
+                    )}
                     placeholder="Password"
                     aria-label="Password"
                     aria-describedby="basic-addon1"
                     onChange={handleValueChange}
                   />
+                  {errors.length > 0 &&
+                    errors.map(
+                      (error, i) =>
+                        error.path == "password" && (
+                          <div key={i} className="ms-5 invalid-feedback">
+                            {error.msg}
+                          </div>
+                        )
+                    )}
                 </div>
-                {/* <small className="text-danger">Wrong password</small> */}
               </div>
               <button
-                className="d-block btn-login btn btn-primary w-full"
+                type="submit"
+                className={clsx("d-block btn w-full", {
+                  "btn-primary": !isLoading,
+                  "btn-secondary": isLoading,
+                })}
+                disabled={isLoading && "disabled"}
                 style={{ width: "100%" }}
               >
                 Login
