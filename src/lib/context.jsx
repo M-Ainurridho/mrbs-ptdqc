@@ -4,8 +4,7 @@ import { createContext, useState } from "react";
 
 export const LoginContext = createContext(false);
 export const UserContext = createContext(null);
-// export const AlertContext = createContext(false);
-
+export const NavLinksContext = createContext(null);
 
 const LoginProvider = ({ children }) => {
   const [login, setLogin] = useState(false);
@@ -27,14 +26,14 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-// export const AlertProvider = ({ children }) => {
-//   const [alert, setAlert] = useState(false);
+export const NavLinksProvider = ({ children }) => {
+  const [navLinks, setNavLinks] = useState([]);
 
-//   return (
-//     <AlertContext.Provider value={{ alert, setAlert }}>
-//       {children}
-//     </AlertContext.Provider>
-//   );
-// };
+  return (
+    <NavLinksContext.Provider value={{ navLinks, setNavLinks }}>
+      {children}
+    </NavLinksContext.Provider>
+  );
+};
 
 export default LoginProvider;

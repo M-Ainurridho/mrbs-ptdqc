@@ -56,6 +56,9 @@ function MyCalendar() {
       resourceAreaColumns={resourceAreaColumns}
       themeSystem="bootstrap5"
       events={events}
+      eventClick={function (info) {
+        console.log(info);
+      }}
       headerToolbar={{
         start: "prev today next",
         center: "title",

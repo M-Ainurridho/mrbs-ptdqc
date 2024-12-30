@@ -1,9 +1,10 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { LoginContext } from "../lib/context";
+import { LoginContext, NavLinksContext } from "../lib/context";
 import Cookies from "js-cookie";
 import axios from "axios";
 import clsx from "clsx";
+import { adminLinks, memberLinks } from "../lib/data";
 
 const LoginButton = () => {
   return (
@@ -23,6 +24,7 @@ const LoginButton = () => {
 
 export const LoginModal = () => {
   const { setLogin } = useContext(LoginContext);
+  const { setNavLinks } = useContext(NavLinksContext);
 
   const [form, setForm] = useState({
     username: "",
@@ -40,8 +42,9 @@ export const LoginModal = () => {
         `http://localhost:3001/v1/users/login`,
         form
       );
-      const { token } = response.data.payload;
+      const { token, role } = response.data.payload;
       Cookies.set("token", token);
+      setNavLinks(role === "admin" ? adminLinks : memberLinks);
       setLogin(true);
 
       const modal = document.querySelector("#loginModal");

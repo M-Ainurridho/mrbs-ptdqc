@@ -2,18 +2,16 @@
 import Container from "./container";
 import Logo from "../assets/ptdqc.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import { LoginContext, UserContext } from "../lib/context";
+import { useContext, useEffect } from "react";
+import { LoginContext, NavLinksContext, UserContext } from "../lib/context";
 import LoginButton from "./login";
 import LogoutButton from "./logout";
 import clsx from "clsx";
-import { adminLinks, memberLinks } from "../lib/data";
 
 const Navbar = () => {
   const { login } = useContext(LoginContext);
   const { user } = useContext(UserContext);
-
-  const [navLinks, setNavLinks] = useState(adminLinks);
+  const { navLinks } = useContext(NavLinksContext);
 
   const location = useLocation();
   const navigate = useNavigate();
