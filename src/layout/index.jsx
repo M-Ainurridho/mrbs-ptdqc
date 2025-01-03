@@ -10,7 +10,7 @@ import { adminLinks, memberLinks } from "../lib/data";
 import { useNavigate } from "react-router-dom";
 
 const Layout = ({ children }) => {
-  const { setLogin } = useContext(LoginContext);
+  const { login, setLogin } = useContext(LoginContext);
   const { user, setUser } = useContext(UserContext);
   const { setNavLinks } = useContext(NavLinksContext);
 
@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
   const token = Cookies.get("token");
 
   const exchangeToken = async () => {
-    if (!token) {
+    if (!token && !login) {
       navigate("/");
     }
 

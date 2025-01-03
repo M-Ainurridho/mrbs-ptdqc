@@ -11,13 +11,15 @@ import Table, {
 import { Link, useSearchParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { dateFormat } from "../../lib/utils";
+import { dateFormat, setTitle } from "../../lib/utils";
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
 import Cookies from "js-cookie";
 import { UserContext } from "../../lib/context";
 
 const Booking = () => {
+  setTitle("Events");
+
   const [events, setEvents] = useState([]);
   const [totalData, setTotalData] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -58,6 +60,13 @@ const Booking = () => {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const times = (time) => {
+    const splited = time.split(":");
+    splited.pop();
+
+    return splited.join(":");
   };
 
   useEffect(() => {
@@ -118,7 +127,7 @@ const Booking = () => {
                       <TableColumn>{dateFormat(event.startRecur)}</TableColumn>
                       <TableColumn>{dateFormat(event.endRecur)}</TableColumn>
                       <TableColumn>
-                        {event.startTime} - {event.endTime}
+                        {times(event.startTime)} - {times(event.endTime)}
                       </TableColumn>
                       <TableColumn>
                         {event.repeat ? event.repeat : "none"}

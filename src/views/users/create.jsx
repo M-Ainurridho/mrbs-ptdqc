@@ -7,11 +7,13 @@ import Container from "../../components/container";
 import InputText from "../../components/forms/input-text";
 import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 // import SelectField, { SelectOption } from "../../../components/forms/selects";
-import { createAlert, toCapitalize } from "../../lib/utils";
+import { createAlert, setTitle, toCapitalize } from "../../lib/utils";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
 
 const CreateUser = () => {
+  setTitle("Create User");
+
   const [form, setForm] = useState({
     username: "",
     email: "",

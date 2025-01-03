@@ -12,8 +12,11 @@ import Table, {
 } from "../../components/tables";
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
+import { setTitle } from "../../lib/utils";
 
 const User = () => {
+  setTitle("Users");
+
   const [users, setUsers] = useState([]);
   const [totalData, setTotalData] = useState(1);
   const [totalPages, setTotalPages] = useState(1);

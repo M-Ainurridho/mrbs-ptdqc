@@ -12,8 +12,11 @@ import Table, {
 } from "../../components/tables";
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
+import { setTitle } from "../../lib/utils";
 
 const Room = () => {
+  setTitle("Rooms");
+
   const [rooms, setRooms] = useState([]);
   const [totalData, setTotalData] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -63,7 +66,7 @@ const Room = () => {
           <TableHead fields={["Room", "Created"]} />
           <TableBody>
             {rooms.map((room) => (
-              <TableRow key={room.id}>
+              <TableRow key={room.id} path={`/rooms/${room.id}`}>
                 <TableColumn>{room.room}</TableColumn>
                 <TableColumn>{room.createdAt}</TableColumn>
               </TableRow>

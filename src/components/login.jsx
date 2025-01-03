@@ -1,6 +1,6 @@
 import { UserIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
-import { LoginContext, NavLinksContext } from "../lib/context";
+import { LoginContext, NavLinksContext, UserContext } from "../lib/context";
 import Cookies from "js-cookie";
 import axios from "axios";
 import clsx from "clsx";
@@ -25,6 +25,7 @@ const LoginButton = () => {
 export const LoginModal = () => {
   const { setLogin } = useContext(LoginContext);
   const { setNavLinks } = useContext(NavLinksContext);
+  const { setUser } = useContext(UserContext);
 
   const [form, setForm] = useState({
     username: "",
@@ -42,9 +43,10 @@ export const LoginModal = () => {
         `http://localhost:3001/v1/users/login`,
         form
       );
-      const { token, role } = response.data.payload;
+      const { token, user } = response.data.payload;
       Cookies.set("token", token);
-      setNavLinks(role === "admin" ? adminLinks : memberLinks);
+      setUser(user);
+      setNavLinks(user.role === "admin" ? adminLinks : memberLinks);
       setLogin(true);
 
       const modal = document.querySelector("#loginModal");
@@ -68,6 +70,10 @@ export const LoginModal = () => {
     });
   };
 
+  const clearForm = () => {
+    setForm({ username: "", password: "" });
+  };
+
   return (
     <div
       className="modal fade"
@@ -87,6 +93,7 @@ export const LoginModal = () => {
               className="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
+              onClick={clearForm}
             ></button>
           </div>
           <div className="modal-body">

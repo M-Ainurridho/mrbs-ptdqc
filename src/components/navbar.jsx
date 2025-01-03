@@ -7,6 +7,8 @@ import { LoginContext, NavLinksContext, UserContext } from "../lib/context";
 import LoginButton from "./login";
 import LogoutButton from "./logout";
 import clsx from "clsx";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const Navbar = () => {
   const { login } = useContext(LoginContext);
@@ -15,16 +17,39 @@ const Navbar = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const token = Cookies.get("token");
 
-  useEffect(() => {
+  const menuAuthorize = async () => {
     if (
       location.pathname.startsWith("/users") ||
       location.pathname.startsWith("/rooms")
     ) {
-      if (user?.role !== "admin") {
-        navigate("/forbidden");
+      try {
+        const responseOne = await axios.post(
+          `http://localhost:3001/v1/users/exchangetoken`,
+          { token }
+        );
+
+        if (responseOne.status === 200) {
+          const { userId } = responseOne.data.payload;
+
+          const responseTwo = await axios.get(
+            `http://localhost:3001/v1/users/${userId}`
+          );
+          const { role } = responseTwo.data.payload.user;
+
+          if (role !== "admin") {
+            navigate("/forbidden");
+          }
+        }
+      } catch (err) {
+        console.log(err);
       }
     }
+  };
+
+  useEffect(() => {
+    menuAuthorize();
   }, []);
 
   return (
@@ -34,11 +59,11 @@ const Navbar = () => {
           <img
             src={Logo}
             alt="Logo"
-            width="40"
-            height="40"
+            width="50"
+            height="50"
             className="d-inline-block align-text-top me-2"
           />
-          PT. Duraquipt Cemerlang
+          <span className="fw-semibold">DQC Meeting Schedule</span>
         </Link>
         {login && (
           <div className="d-flex gap-4 align-items-center w-full">

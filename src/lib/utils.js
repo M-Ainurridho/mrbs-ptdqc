@@ -102,4 +102,37 @@ export const removeAlert = () => {
   localStorage.removeItem("alertIcon");
 };
 
+export const handleEndTimes = (value) => {
+  const times = value.split(":");
+  let hour = Number(times[0]);
+  let minute = Number(times[1]);
+
+  if (minute === 0) {
+    minute = 30;
+  } else {
+    hour += 1;
+    minute = 0;
+  }
+
+  const options = setTimes(hour, minute);
+  const durations = options.map((time) => time.duration + 30).reverse();
+
+  const dataEndTImes = options.map((time, i) => {
+    for (let j = 0; j < durations.length; j++) {
+      const duration = moment.duration(durations[i], "minutes");
+      return {
+        value: time.value,
+        label: time.label,
+        duration: duration.asHours(),
+      };
+    }
+  });
+
+  return dataEndTImes;
+};
+
+export const setTitle = (title) => {
+  window.document.title = `${title} | DQC Meeting Schedule`;
+};
+
 export default currentDate;

@@ -9,6 +9,7 @@ const InputText = ({
   onValueChange,
   className = "",
   errors = [],
+  autoComplete = "off",
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -30,6 +31,7 @@ const InputText = ({
         id={name}
         name={name}
         onChange={handleValueChange}
+        autoComplete={autoComplete}
       />
       {errors.length > 0 &&
         errors.map(

@@ -7,11 +7,13 @@ import Container from "../../components/container";
 import InputText, { InputHidden } from "../../components/forms/input-text";
 import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 // import SelectField, { SelectOption } from "../../../components/forms/selects";
-import { createAlert, toCapitalize } from "../../lib/utils";
+import { createAlert, setTitle, toCapitalize } from "../../lib/utils";
 import clsx from "clsx";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditUser = () => {
+  setTitle("Edit User");
+
   const { id } = useParams();
 
   const [form, setForm] = useState({
@@ -42,7 +44,7 @@ const EditUser = () => {
       );
 
       if (response.data.ok) {
-        createAlert("Amazing!", "Successfully update user", "success")
+        createAlert("Amazing!", "Successfully update user", "success");
         navigate("/users");
       }
     } catch (err) {

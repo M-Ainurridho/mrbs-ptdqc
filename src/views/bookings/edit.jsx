@@ -7,6 +7,7 @@ import currentDate, {
   createAlert,
   dateFormat,
   setTimes,
+  setTitle,
   toCapitalize,
 } from "../../lib/utils";
 import ButtonBack, { ButtonSubmit } from "../../components/buttons";
@@ -27,6 +28,8 @@ import moment from "moment";
 import { recurring } from "../../lib/data";
 
 const EditBooking = () => {
+  setTitle("Edit Event");
+
   const { id } = useParams();
   const { user } = useContext(UserContext);
   const [isRecurring, setIsReccuring] = useState(false);
@@ -62,10 +65,10 @@ const EditBooking = () => {
         form
       );
 
-        if (response.status === 200) {
-          createAlert("Good job!", "Successfuly update an event", "success");
-          navigate("/bookings");
-        }
+      if (response.status === 200) {
+        createAlert("Good job!", "Successfuly update an event", "success");
+        navigate("/bookings");
+      }
     } catch (err) {
       setErrors(err.response.data.errors);
     } finally {

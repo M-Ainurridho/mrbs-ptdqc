@@ -6,12 +6,18 @@ import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import listPlugin from "@fullcalendar/list";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import resourceAreaColumns from "../lib/data";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { LoginContext } from "../lib/context";
+import { createAlert } from "../lib/utils";
 
 function MyCalendar() {
   const [events, setEvents] = useState([]);
   const [resources, setResources] = useState([]);
+
+  const { login } = useContext(LoginContext);
+  const navigate = useNavigate();
 
   const fetchAllEvents = async () => {
     try {
@@ -32,6 +38,26 @@ function MyCalendar() {
       setResources(response.data.payload.rooms);
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const setCustomEvent = (info) => {
+    const start = info.startStr.split("T");
+    const end = info.endStr.split("T");
+    const resourceId = info.resource._resource.id;
+
+    if (!login) {
+      createAlert("Oops!", "You must sign in first", "error");
+    }
+
+    if (end.length > 1) {
+      navigate(
+        `/bookings/create?startRecur=${start[0]}&startTime=${start[1]}&endTime=${end[1]}&resourceId=${resourceId}`
+      );
+    } else {
+      navigate(
+        `/bookings/create?startRecur=${start[0]}&endRecur=${end[0]}&resourceId=${resourceId}`
+      );
     }
   };
 
@@ -56,9 +82,7 @@ function MyCalendar() {
       resourceAreaColumns={resourceAreaColumns}
       themeSystem="bootstrap5"
       events={events}
-      eventClick={function (info) {
-        console.log(info);
-      }}
+      select={setCustomEvent}
       headerToolbar={{
         start: "prev today next",
         center: "title",
@@ -86,6 +110,7 @@ function MyCalendar() {
       selectable={true}
       eventBackgroundColor="#84cc16"
       eventBorderColor="#84cc16"
+      eventColor="red"
       eventTimeFormat={{
         hour: "numeric",
         minute: "2-digit",

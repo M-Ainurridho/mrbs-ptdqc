@@ -4,10 +4,12 @@ import Container from "../../components/container";
 import Layout from "../../layout";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { dateFormat, numberToDay } from "../../lib/utils";
+import { dateFormat, numberToDay, setTitle } from "../../lib/utils";
 import ButtonBack, { ButtonDeleteItem } from "../../components/buttons";
 
 const BookingDetail = () => {
+  setTitle("Event Details");
+
   const { id } = useParams();
   const [event, setEvent] = useState({});
 
@@ -16,6 +18,7 @@ const BookingDetail = () => {
       const response = await axios.get(
         `http://localhost:3001/v1/bookings/${id}`
       );
+      console.log(response.data.payload.booking);
       setEvent(response.data.payload.booking);
     } catch (err) {
       console.log(err);
@@ -31,7 +34,7 @@ const BookingDetail = () => {
       <Container className="my-4">
         <div className="row">
           <div className="col-6 mx-auto">
-            <h4 className="display-6 text-center mb-4">Event Detail</h4>
+            <h4 className="display-6 text-center mb-4">Event Details</h4>
             <table className="table">
               <tbody>
                 <tr>
@@ -59,6 +62,10 @@ const BookingDetail = () => {
                   <td colSpan={3}>
                     {event?.startTime} - {event?.endTime}
                   </td>
+                </tr>
+                <tr>
+                  <th scope="row">Created by</th>
+                  <td colSpan={3}>{event?.username}</td>
                 </tr>
                 <tr>
                   <th scope="row">Recurring</th>

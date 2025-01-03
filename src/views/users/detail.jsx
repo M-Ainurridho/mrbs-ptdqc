@@ -6,8 +6,11 @@ import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import ButtonBack, { ButtonDeleteItem } from "../../components/buttons";
 import { UserContext } from "../../lib/context";
+import { setTitle } from "../../lib/utils";
 
 const UserDetail = () => {
+  setTitle("User Details");
+
   const { id } = useParams();
   const [user, setUser] = useState({});
   const data = useContext(UserContext);
@@ -30,7 +33,7 @@ const UserDetail = () => {
       <Container className="my-4">
         <div className="row">
           <div className="col-6 mx-auto">
-            <h4 className="display-6 text-center mb-4">User Detail</h4>
+            <h4 className="display-6 text-center mb-4">User Details</h4>
             <table className="table">
               <tbody>
                 <tr>
