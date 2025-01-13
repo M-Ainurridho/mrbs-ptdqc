@@ -10,12 +10,12 @@ import Table, {
 } from "../../components/tables";
 import { Link, useSearchParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { dateFormat, setTitle } from "../../lib/utils";
+import { dateFormat, hourAndMinute, setTitle } from "../../lib/utils";
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
 import Cookies from "js-cookie";
 import { UserContext } from "../../lib/context";
+import { getAllEventsWithLimit, getExchangeToken } from "../../lib/api";
 
 const Booking = () => {
   setTitle("Events");
@@ -32,45 +32,31 @@ const Booking = () => {
   const token = Cookies.get("token");
   const { user } = useContext(UserContext);
 
-  const fetchAllEvents = async (page, query) => {
+  const fetchAllEventsWithLimit = async (page, query) => {
     try {
-      const responseOne = await axios.post(
-        `http://localhost:3001/v1/users/exchangetoken`,
-        { token }
-      );
+      const { status, data } = await getExchangeToken(token);
 
-      if (responseOne.status === 200) {
-        const { userId } = responseOne.data.payload;
+      if (status === 200) {
+        const { userId } = data.payload;
 
-        const responseTwo = await axios.get(
-          `http://localhost:3001/v1/bookings/events/${userId}?page=${page}&query=${query}`,
-          {
-            headers: {
-              "Cache-Control": "no-store",
-            },
-          }
+        const { events, totalData, totalPages } = await getAllEventsWithLimit(
+          userId,
+          page,
+          query
         );
-        setEvents(responseTwo.data.payload.events);
-        setTotalData(responseTwo.data.payload.totalData);
-        setTotalPages(responseTwo.data.payload.totalPages);
-        setAlert(responseTwo.data.payload.totalData === 0 ? true : false);
-      } else {
-        throw new Error();
+
+        setEvents(events);
+        setTotalData(totalData);
+        setTotalPages(totalPages);
+        setAlert(totalData === 0 && !alert);
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const times = (time) => {
-    const splited = time.split(":");
-    splited.pop();
-
-    return splited.join(":");
-  };
-
   useEffect(() => {
-    fetchAllEvents(page, query);
+    fetchAllEventsWithLimit(page, query);
   }, [page, query]);
 
   return (
@@ -97,7 +83,7 @@ const Booking = () => {
 
         {alert ? (
           <div className="alert alert-danger text-center" role="alert">
-            No events!
+            There's no events!
           </div>
         ) : (
           <>
@@ -127,7 +113,8 @@ const Booking = () => {
                       <TableColumn>{dateFormat(event.startRecur)}</TableColumn>
                       <TableColumn>{dateFormat(event.endRecur)}</TableColumn>
                       <TableColumn>
-                        {times(event.startTime)} - {times(event.endTime)}
+                        {hourAndMinute(event.startTime)} -{" "}
+                        {hourAndMinute(event.endTime)}
                       </TableColumn>
                       <TableColumn>
                         {event.repeat ? event.repeat : "none"}

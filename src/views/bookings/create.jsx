@@ -18,12 +18,12 @@ import InputStartTime, {
   InputEndTime,
 } from "../../components/bookings/input-time";
 import WeeklySelection from "../../components/bookings/weekly";
-import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { UserContext } from "../../lib/context";
 import clsx from "clsx";
 import { recurring } from "../../lib/data";
 import Swal from "sweetalert2";
+import { createBooking, getAllRooms } from "../../lib/api";
 
 const CreateBooking = () => {
   setTitle("Create Event");
@@ -72,19 +72,16 @@ const CreateBooking = () => {
     formData.userId = user.id;
 
     try {
-      const response = await axios.post(
-        `http://localhost:3001/v1/bookings`,
-        formData
-      ); // post form data
+      const { status } = await createBooking(formData); // post form data
 
-      if (response.status === 200) {
+      if (status === 200) {
         createAlert("Good job!", "Successfully add new event", "success");
         navigate("/bookings");
       }
     } catch (err) {
       if (err.status === 409) {
         setConflicts(err.response.data.errors);
-      } else {
+      } else if (err.status === 400) {
         setErrors(err.response.data.errors); // handler error fields
       }
     } finally {
@@ -126,12 +123,11 @@ const CreateBooking = () => {
 
   const fetchAllRooms = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/rooms`);
-      const { rooms } = response.data.payload;
+      const { rooms } = await getAllRooms();
       setForm({ ...form, resourceId: resourceId || rooms[0].id });
       setRooms(rooms);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -154,8 +150,8 @@ const CreateBooking = () => {
       .join(` || `);
     Swal.fire({
       title: "Conflict Events",
-      text: `Conflicts at: ${eventConflicts}`,
-      icon: "error",
+      text: `Conflict(s) at: ${eventConflicts}`,
+      icon: "warning",
     });
     setConflicts([]);
   };
@@ -175,6 +171,7 @@ const CreateBooking = () => {
                 name="title"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               />
               <Textarea
                 text="Full Description"
@@ -186,6 +183,7 @@ const CreateBooking = () => {
                 name="resourceId"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               >
                 {rooms.map((room) => (
                   <SelectOption
@@ -204,6 +202,7 @@ const CreateBooking = () => {
                   defaultValue={form.startRecur}
                   onValueChange={(e) => handleValueChange(e)}
                   errors={errors}
+                  required={true}
                 />
                 <div className="col-7">
                   <div className="row">
@@ -215,6 +214,7 @@ const CreateBooking = () => {
                       setEndTimes={setEndTimes}
                       errors={errors}
                       defaultValue={form.startTime}
+                      required={true}
                     />
                     <InputEndTime
                       text="End Time"
@@ -224,6 +224,7 @@ const CreateBooking = () => {
                       endTimes={endTimes}
                       errors={errors}
                       defaultValue={form.endTime}
+                      required={true}
                     />
                   </div>
                 </div>
@@ -289,9 +290,11 @@ const CreateBooking = () => {
                       <InputEndDate
                         form={form}
                         name="endRecur"
+                        text="Repeat Until"
                         onValueChange={(e) => handleValueChange(e)}
                         errors={errors}
                         defaultValue={form.endRecur}
+                        required={true}
                       />
                     </div>
                   </div>

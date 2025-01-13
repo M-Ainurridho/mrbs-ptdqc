@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-import axios from "axios";
 import Container from "../../components/container";
 import Layout from "../../layout";
 import { useEffect, useState } from "react";
@@ -13,6 +12,7 @@ import Table, {
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
 import { setTitle } from "../../lib/utils";
+import { getAllRoomsWithLimit } from "../../lib/api";
 
 const Room = () => {
   setTitle("Rooms");
@@ -25,21 +25,22 @@ const Room = () => {
   const page = Number(searchParams?.get("page")) || 1;
   const query = searchParams?.get("query") || "";
 
-  const fetchAllRooms = async (page, query) => {
+  const fetchAllRoomsWithLimit = async (page, query) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3001/v1/rooms?page=${page}&query=${query}`
+      const { rooms, totalData, totalPages } = await getAllRoomsWithLimit(
+        page,
+        query
       );
-      setRooms(response.data.payload.rooms);
-      setTotalData(response.data.payload.totalData);
-      setTotalPages(response.data.payload.totalPages);
+      setRooms(rooms);
+      setTotalData(totalData);
+      setTotalPages(totalPages);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchAllRooms(page, query);
+    fetchAllRoomsWithLimit(page, query);
   }, [page, query]);
 
   return (

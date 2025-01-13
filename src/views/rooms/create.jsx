@@ -10,6 +10,7 @@ import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 import { createAlert, setTitle, toCapitalize } from "../../lib/utils";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
+import { createRoom } from "../../lib/api";
 
 const CreateRoom = () => {
   setTitle("Create Room");
@@ -30,8 +31,9 @@ const CreateRoom = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`http://localhost:3001/v1/rooms`, form);
-      if (response.status === 200) {
+      const { status } = await createRoom(form);
+
+      if (status === 200) {
         createAlert("Good job!", "Successfully add new room", "success");
         navigate("/rooms");
       }
@@ -55,6 +57,7 @@ const CreateRoom = () => {
                 name="room"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               />
 
               <div className="d-flex justify-content-between gap-2">

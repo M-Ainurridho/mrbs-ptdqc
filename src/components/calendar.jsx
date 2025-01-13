@@ -7,10 +7,11 @@ import listPlugin from "@fullcalendar/list";
 import bootstrap5Plugin from "@fullcalendar/bootstrap5";
 import resourceAreaColumns from "../lib/data";
 import { useContext, useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LoginContext } from "../lib/context";
 import { createAlert } from "../lib/utils";
+import { getAllEvents, getAllRooms } from "../lib/api";
+import { Tooltip } from "bootstrap";
 
 function MyCalendar() {
   const [events, setEvents] = useState([]);
@@ -21,44 +22,51 @@ function MyCalendar() {
 
   const fetchAllEvents = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/bookings`, {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      });
-      setEvents(response.data.payload.bookings);
+      const { bookings } = await getAllEvents();
+      setEvents(bookings);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const fetchAllRooms = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/rooms`);
-      setResources(response.data.payload.rooms);
+      const { rooms } = await getAllRooms();
+      setResources(rooms);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   const setCustomEvent = (info) => {
     const start = info.startStr.split("T");
     const end = info.endStr.split("T");
-    const resourceId = info.resource._resource.id;
 
     if (!login) {
       createAlert("Oops!", "You must sign in first", "error");
     }
 
     if (end.length > 1) {
+      const resourceId = info.resource._resource.id;
       navigate(
         `/bookings/create?startRecur=${start[0]}&startTime=${start[1]}&endTime=${end[1]}&resourceId=${resourceId}`
       );
     } else {
-      navigate(
-        `/bookings/create?startRecur=${start[0]}&endRecur=${end[0]}&resourceId=${resourceId}`
-      );
+      navigate(`/bookings/create?startRecur=${start[0]}&endRecur=${end[0]}}`);
     }
+  };
+
+  const handleEventHover = (info) => {
+    new Tooltip(info.el, {
+      title: `${
+        info.event.extendedProps.description
+          ? info.event.extendedProps.description
+          : info.event.title
+      } | PIC - ${info.event.extendedProps.username}`,
+      placement: "top",
+      trigger: "hover",
+      container: "body",
+    });
   };
 
   useEffect(() => {
@@ -110,12 +118,13 @@ function MyCalendar() {
       selectable={true}
       eventBackgroundColor="#84cc16"
       eventBorderColor="#84cc16"
-      eventColor="red"
       eventTimeFormat={{
         hour: "numeric",
         minute: "2-digit",
         meridiem: false,
       }}
+      allDaySlot={false}
+      eventDidMount={handleEventHover}
     />
   );
 }

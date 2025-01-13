@@ -3,7 +3,7 @@ import axios from "axios";
 import Container from "../../components/container";
 import Layout from "../../layout";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Table, {
   TableBody,
   TableColumn,
@@ -13,33 +13,37 @@ import Table, {
 import Pagination from "../../components/pagination";
 import Search from "../../components/forms/search";
 import { setTitle } from "../../lib/utils";
+import { getAllUsersWithLimit } from "../../lib/api";
 
 const User = () => {
   setTitle("Users");
 
   const [users, setUsers] = useState([]);
-  const [totalData, setTotalData] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [alert, setAlert] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams?.get("page")) || 1;
   const query = searchParams?.get("query") || "";
 
-  const fetchAllUsers = async (page, query) => {
+  const fetchAllUsersWithLimit = async (page, query) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3001/v1/users?page=${page}&query=${query}`
+      const { users, totalData, totalPages } = await getAllUsersWithLimit(
+        page,
+        query
       );
-      setUsers(response.data.payload.users);
-      setTotalData(response.data.payload.totalData);
-      setTotalPages(response.data.payload.totalPages);
+      setUsers(users);
+      setTotalData(totalData);
+      setTotalPages(totalPages);
+      setAlert(totalData === 0 && !alert);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchAllUsers(page, query);
+    fetchAllUsersWithLimit(page, query);
   }, [page, query]);
 
   return (
@@ -62,24 +66,32 @@ const User = () => {
           </div>
         </header>
 
-        <Table className="mt-2">
-          <TableHead fields={["Username", "Email", "Role"]} />
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id} path={`/users/${user.id}`}>
-                <TableColumn>{user.username}</TableColumn>
-                <TableColumn>{user.email}</TableColumn>
-                <TableColumn>{user.role}</TableColumn>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Pagination
-          page={page}
-          totalData={totalData}
-          totalPages={totalPages}
-          searchParams={searchParams}
-        />
+        {alert ? (
+          <div className="alert alert-danger text-center" role="alert">
+            There's no user!
+          </div>
+        ) : (
+          <>
+            <Table className="mt-2">
+              <TableHead fields={["Username", "Email", "Role"]} />
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id} path={`/users/${user.id}`}>
+                    <TableColumn>{user.username}</TableColumn>
+                    <TableColumn>{user.email}</TableColumn>
+                    <TableColumn>{user.role}</TableColumn>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Pagination
+              page={page}
+              totalData={totalData}
+              totalPages={totalPages}
+              searchParams={searchParams}
+            />
+          </>
+        )}
       </Container>
     </Layout>
   );

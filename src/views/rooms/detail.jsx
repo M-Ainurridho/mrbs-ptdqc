@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { setTitle } from "../../lib/utils";
 import ButtonBack, { ButtonDeleteItem } from "../../components/buttons";
+import { getRoomById } from "../../lib/api";
 
 const RoomDetail = () => {
   setTitle("Room Details");
@@ -16,9 +17,9 @@ const RoomDetail = () => {
 
   const fetchRoomById = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/rooms/${id}`);
-      setStatusCode(response.status);
-      setRoom(response.data.payload.room);
+      const { room } = await getRoomById(id);
+      setStatusCode(200);
+      setRoom(room);
     } catch (err) {
       setStatusCode(err.status);
     }
@@ -69,9 +70,9 @@ const RoomDetail = () => {
             </div>
           </div>
         ) : (
-          statusCode === 400 && (
+          statusCode === 404 && (
             <div className="alert alert-danger text-center" role="alert">
-              Not Found Room
+              Unknown Room
             </div>
           )
         )}

@@ -16,6 +16,8 @@ import CreateRoom from "../views/rooms/create";
 import RoomDetail from "../views/rooms/detail";
 import EditRoom from "../views/rooms/edit";
 
+import Report from "../views/reports";
+
 import NotFound from "../views/not-found";
 import Forbidden from "../views/forbidden";
 
@@ -39,6 +41,8 @@ const Router = () => {
         <Route path="/rooms/create" element={<CreateRoom />}></Route>
         <Route path="/rooms/:id" element={<RoomDetail />}></Route>
         <Route path="/rooms/:id/edit" element={<EditRoom />}></Route>
+
+        <Route path="/reports" element={<Report />}></Route>
 
         <Route path="/forbidden" element={<Forbidden />}></Route>
         <Route path="*" element={<NotFound />}></Route>

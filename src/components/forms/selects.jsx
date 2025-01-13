@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 /* eslint-disable react/prop-types */
 import clsx from "clsx";
+import Label from "./label";
 
 const SelectField = ({
   text,
@@ -10,6 +11,7 @@ const SelectField = ({
   className = "",
   disabled = "",
   errors = [],
+  required = false,
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -21,9 +23,7 @@ const SelectField = ({
 
   return (
     <div className={clsx("mb-3", className)}>
-      <label htmlFor={name} className="form-label fw-bold">
-        {text}
-      </label>
+      <Label htmlFor={name} text={text} required={required} />
       <select
         className={clsx("form-select", isInvalid)}
         name={name}

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Label from "./label";
 
 /* eslint-disable react/prop-types */
 const InputText = ({
@@ -10,6 +11,7 @@ const InputText = ({
   className = "",
   errors = [],
   autoComplete = "off",
+  required = false,
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -21,9 +23,7 @@ const InputText = ({
 
   return (
     <div className="mb-3">
-      <label htmlFor={name} className="form-label fw-bold">
-        {text}
-      </label>
+      <Label htmlFor={name} text={text} required={required} />
       <input
         type={type}
         className={clsx("form-control", isInvalid, className)}

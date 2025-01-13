@@ -10,6 +10,7 @@ import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 import { createAlert, setTitle, toCapitalize } from "../../lib/utils";
 import clsx from "clsx";
 import { useNavigate, useParams } from "react-router-dom";
+import { getRoomById, updateRoomById } from "../../lib/api";
 
 const EditRoom = () => {
   setTitle("Edit Room");
@@ -34,12 +35,9 @@ const EditRoom = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.patch(
-        `http://localhost:3001/v1/rooms/${id}`,
-        form
-      );
+      const { status } = await updateRoomById(id, form);
 
-      if (response.data.ok) {
+      if (status === 200) {
         createAlert("Nice!", "Successfully update room", "success");
         navigate("/rooms");
       }
@@ -52,13 +50,12 @@ const EditRoom = () => {
 
   const fetchRoomById = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/rooms/${id}`);
-      const { room } = response.data.payload.room;
+      const { room } = await getRoomById(id);
 
-      setStatusCode(response.status);
-      setForm({ ...form, room });
+      setStatusCode(200);
+      setForm({ ...form, room: room.room });
     } catch (err) {
-      if (err.status === 400) {
+      if (err.status === 404) {
         navigate("/rooms");
       }
     }
@@ -84,6 +81,7 @@ const EditRoom = () => {
                   onValueChange={(e) => handleValueChange(e)}
                   errors={errors}
                   defaultValue={form?.room}
+                  required={true}
                 />
 
                 {/* <InputHidden defaultValue={form?.email} /> */}

@@ -8,6 +8,7 @@ import axios from "axios";
 import SweetAlert from "../components/alerts";
 import { adminLinks, memberLinks } from "../lib/data";
 import { useNavigate } from "react-router-dom";
+import { getExchangeToken, getUserById } from "../lib/api";
 
 const Layout = ({ children }) => {
   const { login, setLogin } = useContext(LoginContext);
@@ -24,23 +25,14 @@ const Layout = ({ children }) => {
 
     if (token && !user?.id) {
       try {
-        const responseOne = await axios.post(
-          `http://localhost:3001/v1/users/exchangetoken`,
-          { token }
-        );
+        const { status, data } = await getExchangeToken(token);
 
-        if (responseOne.status === 200) {
-          const { userId } = responseOne.data.payload;
+        if (status === 200) {
+          const { userId } = data.payload;
 
-          const responseTwo = await axios.get(
-            `http://localhost:3001/v1/users/${userId}`
-          );
-          setUser(responseTwo.data.payload.user);
-          setNavLinks(
-            responseTwo.data.payload.user?.role !== "admin"
-              ? memberLinks
-              : adminLinks
-          );
+          const { user } = await getUserById(userId);
+          setUser(user);
+          setNavLinks(user?.role !== "admin" ? memberLinks : adminLinks);
           setLogin(true);
         } else {
           throw new Error();

@@ -12,6 +12,7 @@ const InputStartTime = ({
   setEndTimes,
   errors = [],
   defaultValue = "",
+  required = false,
 }) => {
   const [startTimes, setStartTimes] = useState([]);
 
@@ -64,6 +65,7 @@ const InputStartTime = ({
         handleValueChange(e), handleStartTime(e);
       }}
       errors={errors}
+      required={required}
     >
       <option value="">--:-- --</option>
       {startTimes.length > 0 &&
@@ -87,6 +89,7 @@ export const InputEndTime = ({
   className = "",
   errors = [],
   defaultValue = "",
+  required = false,
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -100,6 +103,7 @@ export const InputEndTime = ({
       disabled={endTimes.length < 1 && "disabled"}
       onValueChange={(e) => handleValueChange(e)}
       errors={errors}
+      required={required}
     >
       <option value="">--:-- --</option>
       {endTimes.length > 0 &&

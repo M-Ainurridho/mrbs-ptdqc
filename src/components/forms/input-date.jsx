@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import clsx from "clsx";
+import Label from "./label";
 
 const InputDate = ({
   text,
@@ -11,6 +12,7 @@ const InputDate = ({
   max = "",
   className = "",
   errors = [],
+  required = false,
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -22,9 +24,7 @@ const InputDate = ({
 
   return (
     <div className={clsx("mb-3", className)}>
-      <label htmlFor={name} className="form-label fw-bold">
-        {text}
-      </label>
+      <Label htmlFor={name} text={text} required={required} />
       <input
         type="date"
         className={clsx("form-control", isInvalid)}
@@ -50,11 +50,13 @@ const InputDate = ({
 };
 
 export const InputEndDate = ({
-  onValueChange,
   name,
+  text,
   form,
   errors = [],
+  onValueChange,
   defaultValue = "",
+  required = false,
 }) => {
   const handleValueChange = (e) => {
     onValueChange(e);
@@ -66,9 +68,12 @@ export const InputEndDate = ({
 
   return (
     <div className="row">
-      <label htmlFor={name} className="col-sm-4 col-form-label fw-bold">
-        Repeat Until
-      </label>
+      <Label
+        htmlFor={name}
+        text={text}
+        required={required}
+        className="col-sm-4 col-form-label"
+      />
       <div className="col-8 me-0">
         <input
           type="date"

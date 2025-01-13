@@ -72,6 +72,13 @@ export const dateFormat = (date) => {
   return formatDate;
 };
 
+export const hourAndMinute = (time) => {
+  const splited = time.split(":");
+  splited.pop();
+
+  return splited.join(":");
+};
+
 export const toCapitalize = (word) => {
   const firstLetter = word[0].toUpperCase();
   const exceptFirstLetter = word.slice(1);

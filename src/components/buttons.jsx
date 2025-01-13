@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Swal from "sweetalert2";
 import { createAlert } from "../lib/utils";
 import { useNavigate } from "react-router-dom";
+import { deleteItem } from "../lib/api";
 
 /* eslint-disable react/prop-types */
 const ButtonBack = ({
@@ -55,16 +56,14 @@ export const ButtonDeleteItem = ({
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axios.delete(
-            `http://localhost:3001/v1/${path}/${id}`
-          );
+          const { status } = await deleteItem(path, id);
 
-          if (response.status === 200) {
+          if (status === 200) {
             createAlert("Deleted", "Your data has been deleted.", "success");
             navigate(`/${path}`);
           }
         } catch (err) {
-          console.log(err);
+          console.error(err);
         }
       }
     });

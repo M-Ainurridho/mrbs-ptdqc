@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import clsx from "clsx";
 import { adminLinks, memberLinks } from "../lib/data";
+import { signInAuthentication } from "../lib/api";
 
 const LoginButton = () => {
   return (
@@ -28,7 +29,7 @@ export const LoginModal = () => {
   const { setUser } = useContext(UserContext);
 
   const [form, setForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
   const [errors, setErrors] = useState([]);
@@ -39,21 +40,21 @@ export const LoginModal = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        `http://localhost:3001/v1/users/login`,
-        form
-      );
-      const { token, user } = response.data.payload;
+      const { token, user } = await signInAuthentication(form);
       Cookies.set("token", token);
       setUser(user);
       setNavLinks(user.role === "admin" ? adminLinks : memberLinks);
       setLogin(true);
 
       const modal = document.querySelector("#loginModal");
-      const modalBackdrop = document.querySelector(".modal-backdrop");
+      const modalBackdrops = Array.from(
+        document.querySelectorAll(".modal-backdrop")
+      );
+      for (let backdrop of modalBackdrops) {
+        backdrop.remove();
+      }
       const body = document.querySelector("body");
       modal.classList.remove("show");
-      modalBackdrop.remove();
       body.setAttribute("class", "");
       body.setAttribute("style", "");
     } catch (err) {
@@ -71,7 +72,8 @@ export const LoginModal = () => {
   };
 
   const clearForm = () => {
-    setForm({ username: "", password: "" });
+    setErrors([]);
+    setForm({ email: "", password: "" });
   };
 
   return (
@@ -105,23 +107,23 @@ export const LoginModal = () => {
                   </span>
                   <input
                     type="text"
-                    name="username"
+                    name="email"
                     className={clsx(
                       "form-control",
                       errors.length > 0 &&
                         errors.map(
-                          (error) => error.path == "username" && "is-invalid"
+                          (error) => error.path == "email" && "is-invalid"
                         )
                     )}
-                    placeholder="Username"
-                    aria-label="Username"
+                    placeholder="Email"
+                    aria-label="Email"
                     aria-describedby="basic-addon1"
                     onChange={handleValueChange}
                   />
                   {errors.length > 0 &&
                     errors.map(
                       (error, i) =>
-                        error.path == "username" && (
+                        error.path == "email" && (
                           <div key={i} className="ms-5 invalid-feedback">
                             {error.msg}
                           </div>

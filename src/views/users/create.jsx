@@ -10,6 +10,8 @@ import ButtonBack, { ButtonSubmit } from "../../components/buttons";
 import { createAlert, setTitle, toCapitalize } from "../../lib/utils";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
+import { createUser, getAllRoles } from "../../lib/api";
+import Label from "../../components/forms/label";
 
 const CreateUser = () => {
   setTitle("Create User");
@@ -34,8 +36,8 @@ const CreateUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`http://localhost:3001/v1/users`, form);
-      if (response.status === 200) {
+      const { status } = await createUser(form);
+      if (status === 200) {
         createAlert("Good job!", "Successfully add new user", "success");
         navigate("/users");
       }
@@ -48,12 +50,11 @@ const CreateUser = () => {
 
   const fetchAllRoles = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/v1/users/roles`);
-      const { roles } = response.data.payload;
+      const { roles } = await getAllRoles();
       setForm({ ...form, roleId: roles[1].id });
       setRoles(roles);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -74,6 +75,7 @@ const CreateUser = () => {
                 name="username"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               />
 
               <InputText
@@ -82,6 +84,7 @@ const CreateUser = () => {
                 type="email"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               />
 
               <InputText
@@ -90,14 +93,13 @@ const CreateUser = () => {
                 type="password"
                 onValueChange={(e) => handleValueChange(e)}
                 errors={errors}
+                required={true}
               />
 
               <div className="mb-3">
                 <div className="row">
                   <div className="col-3">
-                    <label htmlFor="role" className="form-label fw-bold">
-                      Role
-                    </label>
+                    <Label htmlFor="role" text="Role" required={true} />
                   </div>
                   <div className="col-9 d-flex gap-4">
                     {roles.map((role) => (
@@ -108,7 +110,7 @@ const CreateUser = () => {
                           type="radio"
                           name="roleId"
                           id={role.role}
-                          onChange={handleValueChange}
+                          onClick={handleValueChange}
                           value={role.id}
                         />
                         <label className="form-check-label" htmlFor={role.role}>

@@ -3,16 +3,16 @@ import Container from "./container";
 import Logo from "../assets/ptdqc.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { LoginContext, NavLinksContext, UserContext } from "../lib/context";
+import { LoginContext, NavLinksContext } from "../lib/context";
 import LoginButton from "./login";
 import LogoutButton from "./logout";
 import clsx from "clsx";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { getExchangeToken, getUserById } from "../lib/api";
 
 const Navbar = () => {
   const { login } = useContext(LoginContext);
-  const { user } = useContext(UserContext);
   const { navLinks } = useContext(NavLinksContext);
 
   const location = useLocation();
@@ -25,18 +25,13 @@ const Navbar = () => {
       location.pathname.startsWith("/rooms")
     ) {
       try {
-        const responseOne = await axios.post(
-          `http://localhost:3001/v1/users/exchangetoken`,
-          { token }
-        );
+        const { status, data } = await getExchangeToken(token);
 
-        if (responseOne.status === 200) {
-          const { userId } = responseOne.data.payload;
+        if (status === 200) {
+          const { userId } = data.payload;
 
-          const responseTwo = await axios.get(
-            `http://localhost:3001/v1/users/${userId}`
-          );
-          const { role } = responseTwo.data.payload.user;
+          const { user } = await getUserById(userId);
+          const { role } = user;
 
           if (role !== "admin") {
             navigate("/forbidden");
@@ -81,7 +76,9 @@ const Navbar = () => {
             ))}
           </div>
         )}
-        <div>{login ? <LogoutButton /> : <LoginButton />}</div>
+        <div className="d-flex align-items-center gap-2">
+          {login ? <LogoutButton /> : <LoginButton />}
+        </div>
       </Container>
     </nav>
   );
