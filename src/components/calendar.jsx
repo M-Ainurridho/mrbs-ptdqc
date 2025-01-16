@@ -24,6 +24,7 @@ function MyCalendar() {
     try {
       const { bookings } = await getAllEvents();
       setEvents(bookings);
+      console.log(bookings);
     } catch (error) {
       console.error(error);
     }
@@ -125,6 +126,7 @@ function MyCalendar() {
       }}
       allDaySlot={false}
       eventDidMount={handleEventHover}
+      
     />
   );
 }

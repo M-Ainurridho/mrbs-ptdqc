@@ -20,6 +20,7 @@ import Report from "../views/reports";
 
 import NotFound from "../views/not-found";
 import Forbidden from "../views/forbidden";
+import PrintReport from "../views/reports/print";
 
 const Router = () => {
   return (
@@ -43,6 +44,7 @@ const Router = () => {
         <Route path="/rooms/:id/edit" element={<EditRoom />}></Route>
 
         <Route path="/reports" element={<Report />}></Route>
+        <Route path="/reports/print" element={<PrintReport />}></Route>
 
         <Route path="/forbidden" element={<Forbidden />}></Route>
         <Route path="*" element={<NotFound />}></Route>

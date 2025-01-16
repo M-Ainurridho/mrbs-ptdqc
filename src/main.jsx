@@ -5,6 +5,7 @@ import LoginProvider, {
   NavLinksProvider,
   UserProvider,
 } from "./lib/context.jsx";
+import "./index.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
