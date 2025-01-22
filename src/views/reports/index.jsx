@@ -12,11 +12,12 @@ const Report = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:3001/v1/bookings/generate-pdf?date=${selectDate}`,
+        `http://192.168.3.37:5001/v1/bookings/generate-pdf?date=${selectDate}`,
         {
           responseType: "arraybuffer",
         }
       );
+      console.log(response);
 
       const pdfData = new Uint8Array(response.data);
 
