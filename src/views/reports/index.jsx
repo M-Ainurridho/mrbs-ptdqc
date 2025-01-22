@@ -17,7 +17,6 @@ const Report = () => {
           responseType: "arraybuffer",
         }
       );
-      console.log(response);
 
       const pdfData = new Uint8Array(response.data);
 
