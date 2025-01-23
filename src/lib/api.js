@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASEURL = "http://192.168.5.37:3001/v1";
+const BASEURL = "http://192.168.5.37:5001/v1";
 const config = {
   headers: {
     "Cache-Control": "no-store",
@@ -169,21 +169,32 @@ const getExchangeToken = async (token) => {
 
 const signInAuthentication = async (form) => {
   try {
-     const response = await axios.post(
-        `${BASEURL}/users/login`,
-        form
-      );
-      console.log(response)
-      return response.data.payload
+    const response = await axios.post(`${BASEURL}/users/login`, form);
+    console.log(response);
+    return response.data.payload;
   } catch (err) {
-     throw err;
+    throw err;
   }
-}
+};
 
 // Utils
 const deleteItem = async (path, id) => {
   try {
     const response = await axios.delete(`${BASEURL}/${path}/${id}`);
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const generatePDF = async (date) => {
+  try {
+    const response = await axios.get(
+      `${BASEURL}/bookings/generate-pdf?date=${date}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
     return response;
   } catch (err) {
     throw err;
@@ -209,4 +220,5 @@ export {
   getExchangeToken,
   signInAuthentication,
   deleteItem,
+  generatePDF,
 };

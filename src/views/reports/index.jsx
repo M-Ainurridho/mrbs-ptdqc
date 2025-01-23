@@ -3,6 +3,7 @@ import Container from "../../components/container";
 import Layout from "../../layout";
 import { useState } from "react";
 import currentDate from "../../lib/utils";
+import { generatePDF } from "../../lib/api";
 
 const Report = () => {
   const [selectDate, setSelectDate] = useState(currentDate);
@@ -11,13 +12,7 @@ const Report = () => {
   const handlePrint = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://192.168.3.37:5001/v1/bookings/generate-pdf?date=${selectDate}`,
-        {
-          responseType: "arraybuffer",
-        }
-      );
-
+      const response = await generatePDF(selectDate);
       const pdfData = new Uint8Array(response.data);
 
       const blob = new Blob([pdfData.buffer], { type: "application/pdf" });
